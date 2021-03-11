@@ -22,7 +22,7 @@ GitHub if you want to see added functionality.
 Documentation
 =============
 
-```
+```py
 def interpcl(lout, l, cl, llin=10, left=0, right=0):
     r'''interpolate angular power spectrum
 
