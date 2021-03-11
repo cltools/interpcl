@@ -48,5 +48,5 @@ def interpcl(lout, l, cl, llin=10, left=0, right=0):
     clout: array_like
         Interpolated angular power spectrum of the same shape as ``lout`` if
         ``lout`` is an array, or of length ``lout+1`` if ``lout`` is an integer.
-
+    '''
 ```
