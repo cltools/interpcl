@@ -1,11 +1,41 @@
-'''interpcl: interpolate angular power spectra
+# interpcl: interpolate angular power spectra
+#
+# author: Nicolas Tessore <n.tessore@ucl.ac.uk>
+# license: MIT
+'''
 
-author: Nicolas Tessore <n.tessore@ucl.ac.uk>
-license: MIT
+Interpolate angular power spectra (:mod:`interpcl`)
+===================================================
+
+.. currentmodule:: interpcl
+
+A very small package that does interpolation of angular power spectra for random
+fields on the sphere.
+
+Install with pip::
+
+    pip install interpcl
+
+Then import into your code::
+
+    from interpcl import interpcl
+
+Functionality is absolutely minimal at this point. Please open an issue on
+GitHub if you want to see added functionality.
+
+
+Reference/API
+-------------
+
+.. autosummary::
+   :toctree: api
+   :nosignatures:
+
+   interpcl
 
 '''
 
-__version__     = '2021.03.10'
+__version__     = '2021.03.11'
 
 __all__ = [
     'interpcl',
@@ -37,9 +67,9 @@ def interpcl(lout, l, cl, llin=10, left=0, right=0):
 
     Returns
     -------
-    clout: array_like
-        Interpolated angular power spectrum of the same shape as ``lout`` if
-        ``lout`` is an array, or of length ``lout+1`` if ``lout`` is an integer.
+    clout : array_like
+        Interpolated angular power spectrum of the same shape as `lout` if
+        `lout` is an array, or of length ``lout+1`` if `lout` is an integer.
 
     '''
 
