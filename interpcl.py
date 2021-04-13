@@ -35,7 +35,7 @@ Reference/API
 
 '''
 
-__version__     = '2021.03.11'
+__version__     = '2021.4.13'
 
 __all__ = [
     'interpcl',
@@ -43,14 +43,15 @@ __all__ = [
 
 
 import numpy as np
+from scipy.interpolate import interp1d
 
 
-def interpcl(lout, l, cl, llin=10, left=0, right=0):
+def interpcl(lout, l, cl, llin=10, **kwargs):
     r'''interpolate angular power spectrum
 
-    Interpolate an angular power spectrum :math:`C(l)` using linear-linear
-    interpolation for :math:`l \le l_{\rm lin}` and log-log interpolation for
-    :math:`l > l_{\rm lin}`.
+    Interpolate an angular power spectrum :math:`C(l)` using spline
+    interpolation.  For scales :math:`l > l_{\rm lin}`, the interpolation is
+    done in log-log space, i.e. spline interpolation of :math:`\log C(\log l)`.
 
     Parameters
     ----------
@@ -60,10 +61,9 @@ def interpcl(lout, l, cl, llin=10, left=0, right=0):
     l, cl : array_like
         Input angular power spectrum. Must be one-dimensional arrays.
     llin : int, optional
-        Threshold for linear-linear or log-log interpolation. Default is ``10``.
-    left, right : float, optional
-        Fill value for l that are smaller or larger than the input range.
-        Default is ``0``.
+        Threshold for log-log interpolation. Default is ``10``.
+    **kwargs : dict, optional
+        Keyword arguments for :class:`scipy.interpolate.interp1d`.
 
     Returns
     -------
@@ -73,16 +73,14 @@ def interpcl(lout, l, cl, llin=10, left=0, right=0):
 
     '''
 
+    fv = kwargs.pop('fill_value', 'extrapolate')
+
     if np.ndim(lout) == 0:
         lout = np.arange(lout+1)
 
     clout = np.empty_like(lout, dtype=float)
 
-    clout[lout <= llin] = np.interp(lout[lout <= llin], l, cl,
-                                    left=left, right=right)
-
-    clout[lout > llin] = np.exp(np.interp(np.log(lout[lout > llin]),
-                                          np.log(l[l>0]), np.log(cl[l>0]),
-                                          left=left, right=right))
+    clout[lout <= llin] = interp1d(l, cl, fill_value=fv, **kwargs)(lout[lout <= llin])
+    clout[lout > llin] = np.exp(interp1d(np.log(l[l>0]), np.log(cl[l>0]), fill_value=fv, **kwargs)(np.log(lout[lout > llin])))
 
     return clout
