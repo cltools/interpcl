@@ -9,8 +9,8 @@ Interpolate angular power spectra (:mod:`interpcl`)
 
 .. currentmodule:: interpcl
 
-A very small package that does interpolation of angular power spectra for random
-fields on the sphere.
+A very small package that does interpolation of angular power spectra for
+random fields on the sphere.
 
 Install with pip::
 
@@ -35,7 +35,7 @@ Reference/API
 
 '''
 
-__version__     = '2021.4.13'
+__version__     = '2021.5.20'
 
 __all__ = [
     'interpcl',
@@ -46,41 +46,46 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 
-def interpcl(lout, l, cl, llin=10, **kwargs):
+def interpcl(l, cl, lmax=None, dipole=True, monopole=False, **kwargs):
     r'''interpolate angular power spectrum
 
     Interpolate an angular power spectrum :math:`C(l)` using spline
-    interpolation.  For scales :math:`l > l_{\rm lin}`, the interpolation is
-    done in log-log space, i.e. spline interpolation of :math:`\log C(\log l)`.
+    interpolation.  Given input modes `l`, `cl`, returns the power spectrum for
+    all integer modes from 0 to `lmax`, or the highest input mode if `lmax` is
+    not given.  The dipole is computed if `dipole` is ``True``, or set to zero,
+    and similarly for `monopole`.
 
     Parameters
     ----------
-    lout : int or array_like
-        The output mode numbers. If an integer is given, the interpolation is
-        done over the integer array ``0, 1, ..., lout``.
     l, cl : array_like
         Input angular power spectrum. Must be one-dimensional arrays.
-    llin : int, optional
-        Threshold for log-log interpolation. Default is ``10``.
+    lmax : int, optional
+        Highest output mode. If not set, the highest input mode is used.
+    dipole : bool, optional
+        Compute the dipole (``True``), or set it to zero (``False``).
+    monopole : bool, optional
+        Compute the monopole (``True``), or set it to zero (``False``).
     **kwargs : dict, optional
         Keyword arguments for :class:`scipy.interpolate.interp1d`.
 
     Returns
     -------
     clout : array_like
-        Interpolated angular power spectrum of the same shape as `lout` if
-        `lout` is an array, or of length ``lout+1`` if `lout` is an integer.
+        Interpolated angular power spectrum.
 
     '''
 
     fv = kwargs.pop('fill_value', 'extrapolate')
 
-    if np.ndim(lout) == 0:
-        lout = np.arange(lout+1)
+    if lmax is None:
+        lmax = np.max(l)
 
-    clout = np.empty_like(lout, dtype=float)
+    lout = np.arange(lmax+1)
+    clout = interp1d(l, cl, fill_value=fv, **kwargs)(lout)
 
-    clout[lout <= llin] = interp1d(l, cl, fill_value=fv, **kwargs)(lout[lout <= llin])
-    clout[lout > llin] = np.exp(interp1d(np.log(l[l>0]), np.log(cl[l>0]), fill_value=fv, **kwargs)(np.log(lout[lout > llin])))
+    if dipole is False:
+        clout[1] = 0
+    if monopole is False:
+        clout[0] = 0
 
     return clout
